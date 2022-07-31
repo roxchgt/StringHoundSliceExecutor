@@ -1,0 +1,20 @@
+version: "3.9"
+
+
+services:
+  rabbitmq:
+    container_name: rmq
+    image: rabbitmq:3.10-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  worker:
+    image: openjdk:11
+    deploy:
+      replicas: 2
+    depends_on:
+      - rabbitmq
+    volumes:
+      - "../target/scala-2.13/worker-node-assembly-0.1.0-SNAPSHOT.jar:/worker.jar"
+    command: ["java", "-jar", "/worker.jar"]
