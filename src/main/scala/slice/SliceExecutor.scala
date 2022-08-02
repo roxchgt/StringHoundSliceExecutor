@@ -1,6 +1,12 @@
-package main
+package slice
 
+import main.{Config => config}
+import org.apache.commons.lang3.ClassUtils
+import org.opalj.br.{ClassFile, MethodTemplate}
+import org.opalj.util.InMemoryClassLoader
 import org.slf4j.LoggerFactory
+import slice.SliceExecutor.DUMMYSTATIC
+import slice.Utils.ScopeFunctions
 
 import java.lang
 import java.lang.reflect.Constructor
@@ -11,27 +17,25 @@ object SliceExecutor {
     private[slicing] val DUMMYSTATIC = "DUMMYSTATIC"
 }
 
-// → send to worker
 class SliceExecutor(private val slicingAnalysis: SlicingAnalysis) {
     private val jarName = slicingAnalysis.jarName
     private val statistics = slicingAnalysis.statistics
 
     private val logger = LoggerFactory.getLogger(classOf[SliceExecutor])
 
-    private val urls: Array[URL] = if (config.isAndroid) {
-        Array.empty
-    } else {
+    private val urls: Array[URL] = /* if (config.isAndroid) { */ Array.empty
+    /*} else {
         // TODO (Svenja, 13/05/2022): File structure changed, additional libs for java might need to be loaded from somewhere else
 
-        // new File(slicingAnalysis.workingDir).listFiles(it => it.getName.endsWith(".jar")).map(_.toURI.toURL)
+        // new File(/home/roxch/bs/worker-node/src/main/scala/sliceslicingAnalysis.workingDir).listFiles(it => it.getName.endsWith(".jar")).map(_.toURI.toURL)
         // workingDir was the parent dir of the input file
 
-        ???
-    }
+    }*/
 
     def execute(classFile: ClassFile, modifiedMethod: MethodTemplate, strippedClasses: Set[ClassFile], mappedClasses: Map[String, Array[Byte]], attempt: Int): Try[List[String]] = {
         Try {
-            val classLoader = new InMemoryAndURLClassLoader(mappedClasses, this.getClass.getClassLoader, urls)
+            //TODO (Rosh, 01.08.22): InMemoryAndUrlClassLoader not in official OPAL packages
+            val classLoader = new InMemoryClassLoader(mappedClasses, this.getClass.getClassLoader)
 
             strippedClasses.filter(c => c.fqn != classFile.fqn && c.fqn != "slicing.StringLeaker").foreach { rcf =>
                 try {
@@ -225,7 +229,7 @@ private class CallThread(val classLoader: ClassLoader, val targetClassName: Stri
     private def createInstanceOf(clazz: Class[_]): Any = if (clazz.isPrimitive) {
         createInstanceOfPrimitive(ClassUtils.primitiveToWrapper(clazz))
     } else {
-        val const = clazz.getDeclaredConstructors.find(c => c.getParameterTypes.isEmpty && c.isAccessible)
+        val const = clazz.getDeclaredConstructors.find(c => c.getParameterTypes.isEmpty && c.canAccess())
 
         if (const.isDefined) {
             const.get.newInstance()

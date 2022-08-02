@@ -1,4 +1,6 @@
-package main
+package slice
+
+import org.opalj.br.{ClassFile, Method, MethodTemplate}
 
 import scala.util.Try
 
