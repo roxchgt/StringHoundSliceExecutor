@@ -16,5 +16,6 @@ services:
     depends_on:
       - rabbitmq
     volumes:
-      - "../target/scala-2.13/worker-node-assembly-0.1.0-SNAPSHOT.jar:/worker.jar"
-    command: ["java", "-jar", "/worker.jar"]
+      - "../target/scala-2.12/StringHound_SliceExecutor-assembly-1.0.0.jar:/worker.jar"
+      - "~/prod.properties:/prod.properties"
+    command: ["java", "-Xverify:none", "-Dconfig.file=/prod.properties", "-jar", "/worker.jar"]
