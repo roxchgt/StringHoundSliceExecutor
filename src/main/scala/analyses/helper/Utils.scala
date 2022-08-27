@@ -1,6 +1,7 @@
-package slice
+package analyses.helper
 
 object Utils {
+
   implicit class ScopeFunctions[T](val obj: T) extends AnyVal {
     /**
      * Calls the specified function `block` with `this` value as its argument and returns `this`.
@@ -17,5 +18,4 @@ object Utils {
     @inline
     def let[A](block: T => A): A = block(obj)
   }
-
 }
