@@ -3,7 +3,7 @@ scalaVersion := "2.12.8"
 Global / onChangedBuildSource := ReloadOnSourceChanges
 lazy val root = (project in file("."))
   .settings(
-    name := "worker-node"
+    name := "StringHound_SliceExecutor"
   )
 
 libraryDependencies ++= Seq(
@@ -16,11 +16,10 @@ libraryDependencies ++= Seq(
 
   "com.typesafe" % "config" % "1.4.2",
 
-  "de.opal-project" %% "common" % "4.0.0",
-  "de.opal-project" %% "tools" % "4.0.0",
-  "de.opal-project" %% "bytecode-representation" % "4.0.0"
+  "de.opal-project" %% "common" % "2.0.1",
+  "de.opal-project" %% "bytecode-representation" % "2.0.1"
 )
 
 // unmanagedClasspath in Runtime += baseDirectory.value / "resources"
 
-mainClass := Some("main.StringHoundAnalyser")
+mainClass := Some("main.StringHoundSliceExecutor")
