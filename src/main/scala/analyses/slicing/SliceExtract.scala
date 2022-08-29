@@ -2,10 +2,9 @@ package analyses.slicing
 
 import analyses.helper.InMemoryAndURLClassLoader
 import analyses.helper.Utils.ScopeFunctions
-import main.StringHoundSliceExecutor.{config, logger}
 import org.apache.commons.lang3.ClassUtils
 import org.opalj.br.{ClassFile, MethodTemplate}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.Serializable
 import java.lang
@@ -13,16 +12,17 @@ import java.lang.reflect.Constructor
 import scala.util.{Failure, Success, Try}
 
 
-
 @SerialVersionUID(123L)
 case class SliceExtract(
-                        classFileExtract: ClassFileExtract,
-                        modifiedMethodExtract: MethodTemplateExtract,
-                        strippedClassesExtract: Set[ClassFileExtract],
-                        mappedClasses: List[(String, Array[Byte])],
-                        attempt: Int
+                         classFileExtract: ClassFileExtract,
+                         modifiedMethodExtract: MethodTemplateExtract,
+                         strippedClassesExtract: Set[ClassFileExtract],
+                         mappedClasses: List[(String, Array[Byte])],
+                         attempt: Int
                        ) {
 
+  private val config = main.Config
+  val logger: Logger = LoggerFactory.getLogger(SliceExtract.getClass)
 
   def execute(): Try[List[String]] = {
     Try {
@@ -37,7 +37,7 @@ case class SliceExtract(
             case x: Throwable => throw new Exception(x)
           }
         }
-      val thread = new CallThread(classLoader,classFileExtract.thisType, modifiedMethodExtract, attempt)
+      val thread = new CallThread(classLoader, classFileExtract.thisType, modifiedMethodExtract, attempt)
 
       runThread(thread)
 
@@ -74,9 +74,9 @@ case class SliceExtract(
 }
 
 
-
 private class CallThread(val classLoader: ClassLoader, val targetClassName: String, val modifiedMethodExtract: MethodTemplateExtract, attempt: Int) extends Thread(s"Slice-Call-Thread $attempt") {
   private val logger = LoggerFactory.getLogger(classOf[CallThread])
+  private val config = main.Config
 
   var results: Try[List[String]] = _
 
