@@ -33,6 +33,6 @@ object StringHoundSliceExecutor extends App {
     }
   }
 
-  logger.info("- waiting for incoming slices...")
+  logger.info("- waiting for incoming slice extracts ...")
   channel.basicConsume(slices_queue, false, deliverCallback, (tag: String) => {})
 }
