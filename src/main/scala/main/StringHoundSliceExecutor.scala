@@ -8,12 +8,12 @@ import org.slf4j.{Logger, LoggerFactory}
 
 object StringHoundSliceExecutor extends App {
 
-  val logger: Logger = LoggerFactory.getLogger(StringHoundSliceExecutor.getClass)
+  val logger: Logger   = LoggerFactory.getLogger(StringHoundSliceExecutor.getClass)
   val brokerConnection = BrokerConnection
 
   val deliverCallback: DeliverCallback = (tag: String, delivery: Delivery) => {
     val deliveryTag: Long = delivery.getEnvelope.getDeliveryTag
-    val jarName = delivery.getProperties.getAppId
+    val jarName           = delivery.getProperties.getAppId
     try {
       val sliceExtract: SliceExtract =
         SerializationUtils.deserialize(delivery.getBody)
@@ -33,6 +33,6 @@ object StringHoundSliceExecutor extends App {
     }
   }
 
-  logger.info("- waiting for incoming slice extracts ...")
+  logger.info("waiting for incoming slice extracts ...")
   channel.basicConsume(slices_queue, false, deliverCallback, (tag: String) => {})
 }
