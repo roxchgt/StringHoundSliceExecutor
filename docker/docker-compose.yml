@@ -9,14 +9,19 @@ services:
       - 5672:5672
       - 15672:15672
 
-  worker:
+  executor:
     image: openjdk:11
     deploy:
-      replicas: 2
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 3s
     depends_on:
       - rabbitmq
+    restart: on-failure
     volumes:
       - "../target/scala-2.12/StringHound_SliceExecutor-assembly-1.0.0.jar:/worker.jar"
-      - "~/prod.properties:/prod.properties"
-    command: ["java","-Dconfig.file=/prod.properties", "-Xverify:none", "-jar", "/worker.jar"]
+      - "./init.sh:/init.sh"
+      - "./prod.properties:/prod.properties"
+    command: [ "/bin/sh", "/init.sh" ]
 
