@@ -27,6 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+import Dependencies.library.{fastutil, ficus, playjson, reflect, scalaparsercombinators, scalaxml}
 import sbt._
 
 /**
@@ -36,11 +37,9 @@ import sbt._
  */
 object Dependencies {
 
-  val br = Seq(scalaparsercombinators, scalaxml)
+  val br: Seq[ModuleID] = Seq(scalaparsercombinators, scalaxml)
 
-  def common(scalaVersion: String) = Seq(reflect(scalaVersion), scalaxml, playjson, ficus, fastutil)
-
-  import library._
+  def common(scalaVersion: String): Seq[ModuleID] = Seq(reflect(scalaVersion), scalaxml, playjson, ficus, fastutil)
 
   object version {
     val scalaxml = "1.1.0"
@@ -60,7 +59,7 @@ object Dependencies {
     val fastutil = "it.unimi.dsi" % "fastutil" % version.fastutil withSources() withJavadoc()
 
     // --- general dependencies
-    def reflect(scalaVersion: String) = "org.scala-lang" % "scala-reflect" % scalaVersion
+    def reflect(scalaVersion: String): ModuleID = "org.scala-lang" % "scala-reflect" % scalaVersion
   }
 
 }
