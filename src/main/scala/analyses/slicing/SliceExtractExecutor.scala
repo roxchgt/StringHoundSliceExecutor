@@ -24,12 +24,12 @@ class SliceExtractExecutor(jarName: String) {
     Array.empty // yet to be fixed in the upstream version
 
   def execute(
-               classFileExtract: ClassFileExtract,
-               modifiedMethodExtract: MethodTemplateExtract,
-               strippedClasses: Set[ClassFileExtract],
-               mappedClasses: Map[String, Array[Byte]],
-               attempt: Int
-             ): Try[List[String]] = {
+      classFileExtract: ClassFileExtract,
+      modifiedMethodExtract: MethodTemplateExtract,
+      strippedClasses: Set[ClassFileExtract],
+      mappedClasses: Map[String, Array[Byte]],
+      attempt: Int
+  ): Try[List[String]] = {
     Try {
       val classLoader = new InMemoryAndURLClassLoader(
         mappedClasses,
@@ -58,7 +58,7 @@ class SliceExtractExecutor(jarName: String) {
       runThread(thread)
 
       thread.results match {
-        case Success(value) => value
+        case Success(value)     => value
         case Failure(exception) => throw exception
       }
     }
@@ -91,11 +91,11 @@ class SliceExtractExecutor(jarName: String) {
 }
 
 private class XCallThread(
-                           val classLoader: ClassLoader,
-                           val targetClassName: String,
-                           val modifiedMethod: MethodTemplateExtract,
-                           attempt: Int
-                         ) extends Thread(s"Slice-Call-Thread $attempt") {
+    val classLoader: ClassLoader,
+    val targetClassName: String,
+    val modifiedMethod: MethodTemplateExtract,
+    attempt: Int
+) extends Thread(s"Slice-Call-Thread $attempt") {
   private val logger = LoggerFactory.getLogger(classOf[XCallThread])
 
   var results: Try[List[String]] = _
@@ -105,23 +105,23 @@ private class XCallThread(
       try {
         call(classLoader, targetClassName, modifiedMethod)
       } catch {
-        case error: Error => throw new RuntimeException(error)
+        case error: Error  => throw new RuntimeException(error)
         case it: Throwable => throw it
       }
     }
   }
 
   private def call(
-                    classLoader: ClassLoader,
-                    targetClassName: String,
-                    modifiedMethod: MethodTemplateExtract
-                  ): List[String] = {
+      classLoader: ClassLoader,
+      targetClassName: String,
+      modifiedMethod: MethodTemplateExtract
+  ): List[String] = {
     val resultClass = classLoader.loadClass("slicing.StringLeaker")
     val targetClass = classLoader.loadClass(targetClassName)
 
     val zeroArgConstructor = getZeroArgsConstructor(targetClass)
-    val argConstructors = getArgConstructors(targetClass)
-    val method = getAlikeMethod(targetClass, modifiedMethod)
+    val argConstructors    = getArgConstructors(targetClass)
+    val method             = getAlikeMethod(targetClass, modifiedMethod)
 
     val results = modifiedMethod.name match {
       case "<clinit>" =>
@@ -151,10 +151,8 @@ private class XCallThread(
           } catch {
             case th: Throwable =>
               logger.error(
-                s"calling $targetClassName#${modifiedMethod.name} with constructor ${
-                  constructor.getParameterTypes
-                    .mkString("[", ", ", "]")
-                }",
+                s"calling $targetClassName#${modifiedMethod.name} with constructor ${constructor.getParameterTypes
+                  .mkString("[", ", ", "]")}",
                 th
               )
           }
@@ -172,9 +170,9 @@ private class XCallThread(
   }
 
   private def callStaticInitializer(
-                                     targetClass: Class[_],
-                                     resultClass: Class[_]
-                                   ): String = {
+      targetClass: Class[_],
+      resultClass: Class[_]
+  ): String = {
     if (config.logSlicing && config.debug) {
       logger.debug(
         s"Executing static initializer for class ${targetClass.getName}"
@@ -187,9 +185,9 @@ private class XCallThread(
   }
 
   private def callInitializer(
-                               constructor: Constructor[_],
-                               resultClass: Class[_]
-                             ): String = {
+      constructor: Constructor[_],
+      resultClass: Class[_]
+  ): String = {
     if (config.logSlicing && config.debug) {
       logger.debug(
         s"Executing initializer for class ${constructor.getDeclaringClass.getName}"
@@ -202,35 +200,33 @@ private class XCallThread(
   }
 
   private def callStaticMethod(
-                                method: lang.reflect.Method,
-                                resultClass: Class[_]
-                              ): String = {
+      method: lang.reflect.Method,
+      resultClass: Class[_]
+  ): String = {
     invoke(method, null, getParametersFor(method.getParameterTypes))
 
     getResult(resultClass)
   }
 
   private def callInstanceMethod(
-                                  instance: Object,
-                                  method: lang.reflect.Method,
-                                  resultClass: Class[_]
-                                ): String = {
+      instance: Object,
+      method: lang.reflect.Method,
+      resultClass: Class[_]
+  ): String = {
     invoke(method, instance, getParametersFor(method.getParameterTypes))
 
     getResult(resultClass)
   }
 
   private def invoke(
-                      method: lang.reflect.Method,
-                      instance: Object,
-                      parameters: Array[_ <: Object]
-                    ) = {
+      method: lang.reflect.Method,
+      instance: Object,
+      parameters: Array[_ <: Object]
+  ) = {
     if (config.logSlicing && config.debug) {
       logger.debug(
-        s"Invoking method ${method.toString} with parameters ${
-          parameters
-            .mkString("[", ", ", "]")
-        } on instance $instance"
+        s"Invoking method ${method.toString} with parameters ${parameters
+          .mkString("[", ", ", "]")} on instance $instance"
       )
     }
 
@@ -238,9 +234,9 @@ private class XCallThread(
   }
 
   private def getAlikeMethod(
-                              targetClass: Class[_],
-                              methodTemplate: MethodTemplateExtract
-                            ): Option[lang.reflect.Method] = {
+      targetClass: Class[_],
+      methodTemplate: MethodTemplateExtract
+  ): Option[lang.reflect.Method] = {
     targetClass.getDeclaredMethods
       .find { method =>
         method.getName == methodTemplate.name && method.getParameterTypes
@@ -252,16 +248,16 @@ private class XCallThread(
   }
 
   private def getZeroArgsConstructor(
-                                      targetClass: Class[_]
-                                    ): Option[Constructor[_]] = {
+      targetClass: Class[_]
+  ): Option[Constructor[_]] = {
     targetClass.getDeclaredConstructors.find(_.getParameterCount == 0).also { opt =>
       opt.foreach(_.setAccessible(true))
     }
   }
 
   private def getArgConstructors(
-                                  targetClass: Class[_]
-                                ): List[Constructor[_]] = {
+      targetClass: Class[_]
+  ): List[Constructor[_]] = {
     targetClass.getDeclaredConstructors
       .filter(_.getParameterCount > 0)
       .also { list =>
@@ -277,8 +273,8 @@ private class XCallThread(
   }
 
   private def getParametersFor(
-                                parameterTypes: Array[Class[_]]
-                              ): Array[Object] = {
+      parameterTypes: Array[Class[_]]
+  ): Array[Object] = {
     parameterTypes.map(createInstanceOf).map(_.asInstanceOf[Object])
   }
 
@@ -296,16 +292,16 @@ private class XCallThread(
   }
 
   private def createInstanceOfPrimitive(clazz: Class[_]): Any = clazz match {
-    case w if w == classOf[Integer] => Integer.valueOf(0)
+    case w if w == classOf[Integer]           => Integer.valueOf(0)
     case w if w == classOf[java.lang.Boolean] => java.lang.Boolean.FALSE
-    case w if w == classOf[java.lang.Long] => java.lang.Long.valueOf(0L)
+    case w if w == classOf[java.lang.Long]    => java.lang.Long.valueOf(0L)
     case w if w == classOf[java.lang.Short] =>
       java.lang.Short.valueOf(0.asInstanceOf[Short])
     case w if w == classOf[java.lang.Byte] =>
       java.lang.Byte.valueOf(0.asInstanceOf[Byte])
     case w if w == classOf[java.lang.Character] =>
       java.lang.Character.valueOf('a')
-    case w if w == classOf[java.lang.Float] => java.lang.Float.valueOf(0.0f)
+    case w if w == classOf[java.lang.Float]  => java.lang.Float.valueOf(0.0f)
     case w if w == classOf[java.lang.Double] => java.lang.Double.valueOf(0.0)
   }
 
