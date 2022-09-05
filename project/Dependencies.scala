@@ -30,33 +30,34 @@
 import Dependencies.library.{fastutil, ficus, playjson, reflect, scalaparsercombinators, scalaxml}
 import sbt._
 
-/**
- * Manages the library dependencies of the subprojects of OPAL.
- *
- * @author Simon Leischnig
- */
+/** Manages the library dependencies of the subprojects of OPAL.
+  *
+  * @author Simon Leischnig
+  */
 object Dependencies {
 
   val br: Seq[ModuleID] = Seq(scalaparsercombinators, scalaxml)
 
-  def common(scalaVersion: String): Seq[ModuleID] = Seq(reflect(scalaVersion), scalaxml, playjson, ficus, fastutil)
+  def common(scalaVersion: String): Seq[ModuleID] =
+    Seq(reflect(scalaVersion), scalaxml, playjson, ficus, fastutil)
 
   object version {
-    val scalaxml = "1.1.0"
-    val playjson = "2.6.9"
-    val ficus = "1.4.3"
+    val scalaxml               = "1.1.0"
+    val playjson               = "2.6.9"
+    val ficus                  = "1.4.3"
     val scalaparsercombinators = "1.1.0"
-    val fastutil = "8.1.1"
+    val fastutil               = "8.1.1"
   }
 
   object library {
 
     val scalaxml = "org.scala-lang.modules" %% "scala-xml" % version.scalaxml
-    val playjson = "com.typesafe.play" %% "play-json" % version.playjson
-    val ficus = "com.iheart" %% "ficus" % version.ficus
-    val scalaparsercombinators = "org.scala-lang.modules" %% "scala-parser-combinators" % version.scalaparsercombinators
+    val playjson = "com.typesafe.play"      %% "play-json" % version.playjson
+    val ficus    = "com.iheart"             %% "ficus"     % version.ficus
+    val scalaparsercombinators =
+      "org.scala-lang.modules" %% "scala-parser-combinators" % version.scalaparsercombinators
     // --- developer tools dependencies
-    val fastutil = "it.unimi.dsi" % "fastutil" % version.fastutil withSources() withJavadoc()
+    val fastutil = "it.unimi.dsi" % "fastutil" % version.fastutil withSources () withJavadoc ()
 
     // --- general dependencies
     def reflect(scalaVersion: String): ModuleID = "org.scala-lang" % "scala-reflect" % scalaVersion
