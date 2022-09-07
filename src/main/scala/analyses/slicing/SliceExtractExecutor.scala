@@ -17,9 +17,9 @@ object SliceExecutor {
 }
 
 class SliceExtractExecutor(jarName: String) {
-
   private val logger = LoggerFactory.getLogger(classOf[SliceExtractExecutor])
 
+  def getJarName: String = jarName
   private val urls: Array[URL] =
     Array.empty // yet to be fixed in the upstream version
 

@@ -8,8 +8,16 @@ import org.slf4j.{Logger, LoggerFactory}
 
 object StringHoundSliceExecutor extends App {
 
-  val logger: Logger   = LoggerFactory.getLogger(StringHoundSliceExecutor.getClass)
-  val brokerConnection = BrokerConnection
+  val logger: Logger                                     = LoggerFactory.getLogger(StringHoundSliceExecutor.getClass)
+  val brokerConnection                                   = BrokerConnection
+  var sliceExtractExecutor: Option[SliceExtractExecutor] = None
+
+  private def getExecutor(jarName: String): SliceExtractExecutor = {
+    if (sliceExtractExecutor.isEmpty || sliceExtractExecutor.get.getJarName != jarName) {
+      sliceExtractExecutor = Option[SliceExtractExecutor](new SliceExtractExecutor(jarName))
+    }
+    sliceExtractExecutor.get
+  }
 
   val deliverCallback: DeliverCallback = (tag: String, delivery: Delivery) => {
     val deliveryTag: Long = delivery.getEnvelope.getDeliveryTag
@@ -19,7 +27,7 @@ object StringHoundSliceExecutor extends App {
         SerializationUtils.deserialize(delivery.getBody)
 
       val result =
-        sliceExtract.executeWith(sliceExtractExecutor = new SliceExtractExecutor(jarName))
+        sliceExtract.executeWith(getExecutor(jarName))
 
       val serializedResult = SerializationUtils.serialize(result)
 
