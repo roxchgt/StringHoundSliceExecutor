@@ -1,10 +1,10 @@
 package analyses.slicing
 
+import analyses.helper.InMemoryAndURLClassLoader
 import analyses.helper.Utils.ScopeFunctions
 import analyses.slicing.SliceExecutor.DUMMYSTATIC
 import main.{Config => config}
 import org.apache.commons.lang3.ClassUtils
-import org.opalj.util.InMemoryAndURLClassLoader
 import org.slf4j.LoggerFactory
 
 import java.lang
