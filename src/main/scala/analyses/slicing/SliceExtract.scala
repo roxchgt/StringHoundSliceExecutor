@@ -1,7 +1,5 @@
 package analyses.slicing
 
-import org.opalj.br.{ClassFile, MethodTemplate}
-
 import java.io.Serializable
 import scala.util.Try
 
@@ -23,12 +21,9 @@ case class SliceExtract(
     )
 }
 
-case class ClassFileExtract(fqn: String, thisType: String) extends Serializable {
-  def this(cf: ClassFile) = this(cf.fqn, cf.thisType.toJava)
-}
+@SerialVersionUID(1L)
+case class ClassFileExtract(fqn: String, thisType: String) extends Serializable
 
+@SerialVersionUID(2L)
 case class MethodTemplateExtract(name: String, parameterTypes: List[Class[_]], isStatic: Boolean)
-    extends Serializable {
-  def this(modMethod: MethodTemplate) =
-    this(modMethod.name, modMethod.parameterTypes.toList.map(_.toJavaClass), modMethod.isStatic)
-}
+    extends Serializable
