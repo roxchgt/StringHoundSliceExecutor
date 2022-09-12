@@ -1,6 +1,5 @@
 version: "3.9"
 
-
 services:
   rabbitmq:
     container_name: rmq
@@ -12,16 +11,17 @@ services:
   executor:
     image: openjdk:11
     deploy:
-      replicas: 3
+      replicas: 6
       restart_policy:
         condition: on-failure
-        delay: 3s
+        delay: 2s
     depends_on:
       - rabbitmq
     restart: on-failure
     volumes:
-      - "../target/scala-2.12/StringHound_SliceExecutor-assembly-1.0.0.jar:/worker.jar"
-      - "./init.sh:/init.sh"
-      - "./prod.conf:/prod.conf"
+      #- "../target/scala-2.12/StringHound_SliceExecutor-assembly-1.0.0.jar:/executor.jar"
+      - "./files/executor.jar:/executor.jar"
+      - "./files/init.sh:/init.sh"
+      - "./files/prod.conf:/prod.conf"
     command: [ "/bin/sh", "/init.sh" ]
 
