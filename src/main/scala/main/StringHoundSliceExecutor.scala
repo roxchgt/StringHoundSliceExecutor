@@ -19,14 +19,11 @@ object StringHoundSliceExecutor extends App {
     sliceExtractExecutor.get
   }
 
-  logger.info("waiting for incoming slice extracts ...")
-  channel.basicConsume(
-    slices_queue,
-    false,
-    (tag: String, delivery: Delivery) => {
-      val deliveryTag: Long = delivery.getEnvelope.getDeliveryTag
-      val prop: AMQP.BasicProperties = delivery.getProperties
-      val jarName: String = prop.getAppId
+  val deliveryCallback: DeliverCallback = (tag: String, delivery: Delivery) => {
+    val deliveryTag: Long = delivery.getEnvelope.getDeliveryTag
+    val prop: AMQP.BasicProperties = delivery.getProperties
+    val jarName: String = prop.getAppId
+    if (!delivery.getEnvelope.isRedeliver) {
       if (prop.getType == "last") {
         channel.basicPublish("", results_queue, prop, null)
         channel.basicAck(deliveryTag, false)
@@ -47,9 +44,19 @@ object StringHoundSliceExecutor extends App {
             channel.basicReject(deliveryTag, false)
         }
       }
-    },
+    } else {
+      channel.basicReject(deliveryTag, false)
+    }
+  }
+
+  channel.basicConsume(
+    slices_queue,
+    false,
+    deliveryCallback,
     (tag: String) => {
       logger.info(s"Consumer {} cancelled.", tag)
     }
   )
+
+  logger.info("waiting for incoming slice extracts ...")
 }
