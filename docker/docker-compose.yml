@@ -7,21 +7,27 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics is_running
+      interval: 2s
+      timeout: 5s
 
   executor:
     image: openjdk:11
     deploy:
-      replicas: 6
+      replicas: 3
       restart_policy:
         condition: on-failure
-        delay: 2s
+        delay: 1s
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     restart: on-failure
     volumes:
-      #- "../target/scala-2.12/StringHound_SliceExecutor-assembly-1.0.0.jar:/executor.jar"
       - "./files/executor.jar:/executor.jar"
-      - "./files/init.sh:/init.sh"
       - "./files/prod.conf:/prod.conf"
-    command: [ "/bin/sh", "/init.sh" ]
-
+    command: >
+      java
+      -Dconfig.file=/prod.conf
+      -Xverify:none
+      -jar /executor.jar
