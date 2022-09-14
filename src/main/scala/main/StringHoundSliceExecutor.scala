@@ -25,22 +25,27 @@ object StringHoundSliceExecutor extends App {
     false,
     (tag: String, delivery: Delivery) => {
       val deliveryTag: Long = delivery.getEnvelope.getDeliveryTag
-
-      val jarName = delivery.getProperties.getAppId
-      try {
-        val sliceExtract: SliceExtract = SerializationUtils.deserialize(delivery.getBody)
-
-        val result = sliceExtract.executeWith(getExecutor(jarName))
-
-        val serializedResult = SerializationUtils.serialize(result)
-
-        channel.basicPublish("", results_queue, delivery.getProperties, serializedResult)
+      val prop: AMQP.BasicProperties = delivery.getProperties
+      val jarName: String = prop.getAppId
+      if (prop.getType == "last") {
+        channel.basicPublish("", results_queue, prop, null)
         channel.basicAck(deliveryTag, false)
+      } else {
+        try {
+          val sliceExtract: SliceExtract = SerializationUtils.deserialize(delivery.getBody)
 
-      } catch {
-        case x: Exception =>
-          logger.error(x.getMessage)
-          channel.basicReject(deliveryTag, false)
+          val result = sliceExtract.executeWith(getExecutor(jarName))
+
+          val serializedResult = SerializationUtils.serialize(result)
+
+          channel.basicPublish("", results_queue, prop, serializedResult)
+          channel.basicAck(deliveryTag, false)
+
+        } catch {
+          case x: Exception =>
+            logger.error(x.getMessage)
+            channel.basicReject(deliveryTag, false)
+        }
       }
     },
     (tag: String) => {

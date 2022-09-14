@@ -82,7 +82,7 @@ class SliceExtractExecutor(jarName: String) {
             )
           }
         } catch {
-          case th: Throwable => logger.error(jarName, th)
+          case ex: Exception => logger.error(ex.getMessage)
         }
 
       }
