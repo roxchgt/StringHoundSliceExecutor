@@ -25,6 +25,7 @@ object StringHoundSliceExecutor extends App {
     val jarName: String = prop.getAppId
     if (!delivery.getEnvelope.isRedeliver) {
       if (prop.getType == "last") {
+        Thread.sleep(2000)
         channel.basicPublish("", results_queue, prop, null)
         channel.basicAck(deliveryTag, false)
       } else {
