@@ -1,5 +1,3 @@
 FROM openjdk:11
-COPY files/* /
-CMD /bin/sh /init.sh
-
-
+ADD files/* /
+CMD ["java", "-Dconfig.file=/prod.conf", "-Xverify:none", "-jar", "/executor.jar"]

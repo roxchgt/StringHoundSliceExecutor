@@ -11,18 +11,19 @@ services:
       test: rabbitmq-diagnostics is_running
       interval: 2s
       timeout: 5s
+    restart: on-failure
 
   executor:
+    #    image: ghcr.io/roxchgt/sth-executor:latest
     image: openjdk:11
     deploy:
-      replicas: 3
+      replicas: 8
       restart_policy:
-        condition: on-failure
+        condition: always
         delay: 1s
     depends_on:
       rabbitmq:
         condition: service_healthy
-    restart: on-failure
     volumes:
       - "./files/executor.jar:/executor.jar"
       - "./files/prod.conf:/prod.conf"
