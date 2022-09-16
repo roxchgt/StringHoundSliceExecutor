@@ -23,30 +23,29 @@ object StringHoundSliceExecutor extends App {
     val deliveryTag: Long = delivery.getEnvelope.getDeliveryTag
     val prop: AMQP.BasicProperties = delivery.getProperties
     val jarName: String = prop.getAppId
-    if (!delivery.getEnvelope.isRedeliver) {
-      if (prop.getType == "last") {
-        Thread.sleep(2000)
-        channel.basicPublish("", results_queue, prop, null)
-        channel.basicAck(deliveryTag, false)
-      } else {
-        try {
-          val sliceExtract: SliceExtract = SerializationUtils.deserialize(delivery.getBody)
 
-          val result = sliceExtract.executeWith(getExecutor(jarName))
-
-          val serializedResult = SerializationUtils.serialize(result)
-
-          channel.basicPublish("", results_queue, prop, serializedResult)
-          channel.basicAck(deliveryTag, false)
-
-        } catch {
-          case x: Exception =>
-            logger.error(x.getMessage)
-            channel.basicReject(deliveryTag, false)
-        }
-      }
-    } else {
+    if (prop.getType == "last") {
+      Thread.sleep(1000)
+      channel.basicPublish("", results_queue, prop, null)
+      channel.basicAck(deliveryTag, false)
+    } else if (delivery.getEnvelope.isRedeliver) {
       channel.basicReject(deliveryTag, false)
+    } else {
+      try {
+        val sliceExtract: SliceExtract = SerializationUtils.deserialize(delivery.getBody)
+
+        val result = sliceExtract.executeWith(getExecutor(jarName))
+
+        val serializedResult = SerializationUtils.serialize(result)
+
+        channel.basicPublish("", results_queue, prop, serializedResult)
+        channel.basicAck(deliveryTag, false)
+
+      } catch {
+        case x: Exception =>
+          logger.error(x.getMessage)
+          channel.basicReject(deliveryTag, false)
+      }
     }
   }
 

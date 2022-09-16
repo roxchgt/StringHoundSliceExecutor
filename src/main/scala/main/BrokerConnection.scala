@@ -22,6 +22,6 @@ object BrokerConnection {
   channel.basicQos(1)
 
   channel.queueDeclare(results_queue, false, false, false, args)
-  channel.queueDeclare(slices_queue, false, false, false, args))
+  channel.queueDeclare(slices_queue, false, false, false, args)
 
 }
